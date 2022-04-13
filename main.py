@@ -1,11 +1,13 @@
 from openpyxl import load_workbook
 import glob
 import os
-# import easygui
-# print(easygui.fileopenbox())
+import easygui
+
 
 table_dir = "D:\\jakub.kaleta\\automat\\iveco\\excel\\"
-workbook_baza = load_workbook(filename=table_dir + "tabela_iveco_matryca.xlsx", data_only=True)
+# myfile = table_dir + "tabela_iveco_matryca.xlsx"
+myfile = easygui.fileopenbox()
+workbook_baza = load_workbook(filename=myfile, data_only=True)
 sheet_baza = workbook_baza.active
 
 co1 = 0.7
