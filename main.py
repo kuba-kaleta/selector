@@ -1,12 +1,11 @@
 from openpyxl import load_workbook
-import easygui
+import glob
+import os
+# import easygui
 # print(easygui.fileopenbox())
 
-workbook = load_workbook(filename="D:\\jakub.kaleta\\automat\\iveco\\excel\\tabela_iveco_matryca.xlsx", data_only=True)
-sheet = workbook.active
-
-table_dir = "D:\\jakub.kaleta\\automat\\iveco\\excel\\tabele\\"
-workbook_baza = load_workbook(filename="D:\\jakub.kaleta\\automat\\iveco\\excel\\tabele\\tabela_iveco_7774.xlsx", data_only=True)
+table_dir = "D:\\jakub.kaleta\\automat\\iveco\\excel\\"
+workbook_baza = load_workbook(filename=table_dir + "tabela_iveco_matryca.xlsx", data_only=True)
 sheet_baza = workbook_baza.active
 
 co1 = 0.7
@@ -14,26 +13,57 @@ co2 = 0.2
 co3 = 0.1
 
 
+def safe_float(val):
+    try:
+        return float(val)
+    except (ValueError, TypeError):
+        return 0.0
+
+
 def compare(cur_sheet):
-    scr = 0.0
-    scr_x = 0.0
+    scr_show = 0.0
+    scr_ang = 0.0
+    scr_pianka = 0.0
 
-    for i in range(2,82):
-        cur1 = float(cur_sheet["A" + str(i)].value)
-        baza1 = float(sheet["A" + str(i)].value)
-        if abs(cur1 - baza1) < 1:
-            scr_x += 2.0
-        else:
-            scr_x += 1.0
+    for i in range(2, 82):
+        cur_x = safe_float(cur_sheet["A" + str(i)].value)
+        baza_x = safe_float(sheet_baza["A" + str(i)].value)
+        cur_y = safe_float(cur_sheet["B" + str(i)].value)
+        baza_y = safe_float(sheet_baza["B" + str(i)].value)
+        cur_z = safe_float(cur_sheet["C" + str(i)].value)
+        baza_z = safe_float(sheet_baza["C" + str(i)].value)
+        if abs(cur_x - baza_x) < 1 and abs(cur_y - baza_y) < 1 and abs(cur_z - baza_z) < 1 and \
+                cur_sheet["D" + str(i)].value == sheet_baza["D" + str(i)].value:
+            scr_show += 1.0
 
-    scr = co1*scr_x + scr
+    for i in range(2, 82):
+        if cur_sheet["E" + str(i)].value == sheet_baza["E" + str(i)].value:
+            scr_show += 1.0
+
+    for i in range(2, 82):
+        if cur_sheet["K" + str(i)].value == sheet_baza["K" + str(i)].value:
+            scr_show += 1.0
+
+    scr = co1*scr_show + co2*scr_ang + co3*scr_pianka
     return scr
 
 
-score = 0.0
+files = glob.glob("D:\\jakub.kaleta\\automat\\iveco\\excel\\tabele\\*.xlsx")
 
-score += compare(sheet)
+res = {}
+for file in files:
+    basename = os.path.basename(file)
+    workbook = load_workbook(filename=file, data_only=True)
+    sheet = workbook.active
+    score = round(compare(sheet), 2)
+    res[basename] = score
 
-print(score)
+res_sort = {k: v for k, v in sorted(res.items(), key=lambda item: item[1], reverse=True)}
+for key, value in res_sort.items():
+    print(key, ' : ', value)  # sort dict
+
+
+
+
 
 
