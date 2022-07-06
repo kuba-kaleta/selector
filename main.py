@@ -1,3 +1,8 @@
+# ===========================================================
+# File: main.py                
+# Comment: Excel filename searching tool for seat automated spacing model      
+# ===========================================================
+
 from openpyxl import load_workbook
 import glob
 import os
